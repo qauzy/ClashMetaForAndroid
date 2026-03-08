@@ -19,8 +19,12 @@ import kotlinx.coroutines.withContext
 import java.util.*
 import java.util.concurrent.TimeUnit
 import com.github.kr328.clash.design.R
+import android.content.ClipboardManager
+import android.content.ClipData
+import androidx.databinding.ObservableBoolean
 
 class ProfilesActivity : BaseActivity<ProfilesDesign>() {
+    private var rotateJob: kotlinx.coroutines.Job? = null
     override suspend fun main() {
         val design = ProfilesDesign(this)
 
@@ -71,9 +75,16 @@ class ProfilesActivity : BaseActivity<ProfilesDesign>() {
                             }
                         }
                         is ProfilesDesign.Request.Duplicate -> {
-                            val uuid = withProfile { clone(it.profile.uuid) }
+                            val subscriptionUrl = it.profile.source  // ⚠ 根据真实字段改
 
-                            startActivity(PropertiesActivity::class.intent.setUUID(uuid))
+                            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                            val clip = ClipData.newPlainText("subscription_url", subscriptionUrl)
+                            clipboard.setPrimaryClip(clip)
+
+                            design?.showToast(
+                                "订阅地址已复制",
+                                ToastDuration.Short
+                            )
                         }
                     }
                 }
@@ -91,7 +102,6 @@ class ProfilesActivity : BaseActivity<ProfilesDesign>() {
             patchProfiles(queryAll())
         }
     }
-
     override fun onProfileUpdateCompleted(uuid: UUID?) {
         if(uuid == null)
             return;

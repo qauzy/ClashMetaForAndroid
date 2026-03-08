@@ -45,6 +45,7 @@ Feature of [Clash.Meta](https://github.com/MetaCubeX/Clash.Meta)
 
    ```bash
    ./gradlew app:assembleMeta-AlphaRelease
+   ./gradlew --no-daemon app:assembleAlphaRelease
    ```
 
 ### Automation

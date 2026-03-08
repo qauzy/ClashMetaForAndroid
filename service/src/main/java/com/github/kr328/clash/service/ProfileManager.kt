@@ -37,14 +37,14 @@ class ProfileManager(private val context: Context) : IProfileManager,
         }
     }
 
-    override suspend fun create(type: Profile.Type, name: String, source: String): UUID {
+    override suspend fun create(type: Profile.Type, name: String, source: String, interval: Long): UUID {
         val uuid = generateProfileUUID()
         val pending = Pending(
             uuid = uuid,
             name = name,
             type = type,
             source = source,
-            interval = 0,
+            interval = interval,
             upload = 0,
             total = 0,
             download = 0,
@@ -141,7 +141,7 @@ class ProfileManager(private val context: Context) : IProfileManager,
         try {
             val request = Request.Builder()
                 .url(old.source)
-                .header("User-Agent", "ClashforWindows/0.19.23")
+                .header("User-Agent", "ClashMetaForAndroid")
                 .build()
 
             client.newCall(request).execute().use { response ->

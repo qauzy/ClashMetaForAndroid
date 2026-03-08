@@ -3,6 +3,8 @@ package com.github.kr328.clash.design
 import android.content.Context
 import android.view.View
 import androidx.appcompat.app.AlertDialog
+import androidx.databinding.ObservableBoolean
+import androidx.databinding.ObservableField
 import com.github.kr328.clash.core.model.TunnelState
 import com.github.kr328.clash.core.util.trafficTotal
 import com.github.kr328.clash.design.databinding.DesignAboutBinding
@@ -10,6 +12,7 @@ import com.github.kr328.clash.design.databinding.DesignMainBinding
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.design.util.resolveThemedColor
 import com.github.kr328.clash.design.util.root
+import com.github.kr328.clash.service.model.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -23,8 +26,26 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
         OpenSettings,
         OpenHelp,
         OpenAbout,
+        UpdateActive,
+        UpdateProvider,
+        BuyProfile,
     }
+    val profileExpiry = ObservableField<String>("") // 初始化为空字符串，避免 null
+    var showBuyButton = ObservableBoolean(true)
 
+    suspend fun setProfile(profile: Profile?) {
+        withContext(Dispatchers.Main){
+            // 订购按钮控制
+//            showBuyButton.set(profile?.source?.startsWith("https://www.aider.host/") == true)
+            showBuyButton.set(true)
+        }
+    }
+    // 在 MainDesign 类中添加以下方法
+    suspend fun setProfileExpiry(expiry: String?) {
+        withContext(Dispatchers.Main) {
+            binding.profileExpiry = expiry // 这一步会将数据传给 XML
+        }
+    }
     private val binding = DesignMainBinding
         .inflate(context.layoutInflater, context.root, false)
 

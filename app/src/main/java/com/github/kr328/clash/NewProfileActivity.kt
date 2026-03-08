@@ -46,7 +46,7 @@ class NewProfileActivity : BaseActivity<NewProfileDesign>() {
                                     is ProfileProvider.File ->
                                         create(Profile.Type.File, name)
                                     is ProfileProvider.Url ->
-                                        create(Profile.Type.Url, name)
+                                        create(Profile.Type.Url, name, interval = 86_400_000)
                                     is ProfileProvider.External -> {
                                         val data = p.get()
 

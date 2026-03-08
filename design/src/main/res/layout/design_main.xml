@@ -15,6 +15,12 @@
             name="mode"
             type="String" />
         <variable
+            name="showBuyButton"
+            type="boolean" />
+        <variable
+            name="profileExpiry"
+            type="String" />
+        <variable
             name="profileName"
             type="String" />
         <variable
@@ -26,7 +32,6 @@
         <variable
             name="hasProviders"
             type="boolean" />
-
         <import type="android.view.View" />
         <import type="com.github.kr328.clash.design.MainDesign.Request" />
     </data>
@@ -79,6 +84,7 @@
 
                 <com.github.kr328.clash.design.view.LargeActionCard
                     android:layout_width="match_parent"
+                    android:visibility="visible"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="@dimen/main_card_margin_vertical"
                     android:onClick="@{() -> self.request(Request.ToggleStatus)}"
@@ -98,16 +104,58 @@
                     app:subtext="@{mode}"
                     app:text="@string/proxy" />
 
-                <com.github.kr328.clash.design.view.LargeActionCard
+                <FrameLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginVertical="@dimen/main_card_margin_vertical"
-                    android:onClick="@{() -> self.request(Request.OpenProfiles)}"
-                    app:icon="@drawable/ic_baseline_view_list"
-                    app:subtext="@{profileName != null ? @string/format_profile_activated(profileName) : @string/not_selected}"
-                    app:text="@string/profile" />
+                    android:clipChildren="false">
 
-                <com.github.kr328.clash.design.view.LargeActionLabel
+                    <com.github.kr328.clash.design.view.LargeActionCard
+                        android:id="@+id/profileCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:onClick="@{() -> self.request(Request.OpenProfiles)}"
+                        app:icon="@drawable/ic_baseline_view_list"
+                        app:text="@{profileName != null ? profileName :  @string/profile}"
+                        app:subtext="@{profileName != null ? (profileExpiry != null ? profileExpiry : ``) :  @string/not_selected}" />
+
+                    <ImageButton
+                        android:id="@+id/syncButton"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="8dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:src="@drawable/ic_baseline_sync"
+                        android:elevation="12dp"
+                        android:translationZ="12dp"
+                        android:visibility="@{profileName != null ? View.VISIBLE : View.GONE}"
+                        android:onClick="@{() -> self.request(Request.UpdateActive)}"/>
+                    <!-- 订购按钮 -->
+                    <TextView
+                        android:id="@+id/buyButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="40dp"
+                        android:layout_gravity="end|center_vertical"
+                        android:layout_marginEnd="60dp"
+                        android:visibility="visible"
+                        android:text="@string/buy"
+                        android:textColor="#03A9F4"
+                        android:gravity="center"
+                        android:elevation="12dp"
+                        android:translationZ="20dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:onClick="@{() -> self.request(Request.BuyProfile)}"
+                        android:paddingHorizontal="12dp"/>
+                </FrameLayout>
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/main_card_margin_vertical"
+                android:visibility="@{clashRunning &amp;&amp; hasProviders ? View.VISIBLE : View.GONE}"
+                android:clipChildren="false">
+
+                <com.github.kr328.clash.design.view.LargeActionCard
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginVertical="@dimen/main_label_margin_vertical"
@@ -115,7 +163,19 @@
                     android:visibility="@{clashRunning &amp;&amp; hasProviders ? View.VISIBLE : View.GONE}"
                     app:icon="@drawable/ic_baseline_swap_vertical_circle"
                     app:text="@string/providers" />
-
+                <ImageButton
+                    android:id="@+id/syncProviderButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:layout_marginEnd="8dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:src="@drawable/ic_baseline_sync"
+                    android:elevation="12dp"
+                    android:translationZ="12dp"
+                    android:visibility="@{clashRunning &amp;&amp; hasProviders ? View.VISIBLE : View.GONE}"
+                    android:onClick="@{() -> self.request(Request.UpdateProvider)}"/>
+            </FrameLayout>
                 <com.github.kr328.clash.design.view.LargeActionLabel
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

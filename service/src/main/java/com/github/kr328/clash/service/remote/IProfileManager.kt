@@ -6,7 +6,7 @@ import java.util.*
 
 @BinderInterface
 interface IProfileManager {
-    suspend fun create(type: Profile.Type, name: String, source: String = ""): UUID
+    suspend fun create(type: Profile.Type, name: String, source: String = "", interval: Long=0): UUID
     suspend fun clone(uuid: UUID): UUID
     suspend fun commit(uuid: UUID, callback: IFetchObserver? = null)
     suspend fun release(uuid: UUID)

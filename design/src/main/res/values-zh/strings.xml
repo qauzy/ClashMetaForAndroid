@@ -49,9 +49,10 @@
     <string name="mode">模式</string>
     <string name="name">名称</string>
     <string name="network">网络</string>
-    <string name="new_profile">新配置</string>
+    <string name="new_profile">抱脸虫</string>
     <string name="not_selected">未选择</string>
     <string name="ok">确认</string>
+    <string name="buy">订购</string>
     <string name="profile">配置</string>
     <string name="profile_name">配置名称</string>
     <string name="profiles">配置</string>
@@ -144,14 +145,14 @@
     <string name="doubles">双列</string>
     <string name="multiple">多列</string>
     <string name="not_selectable">不可选择</string>
-    <string name="providers">外部资源</string>
+    <string name="providers">代理集合</string>
     <string name="unavailable">不可用</string>
     <string name="_new">新建</string>
     <string name="value">值</string>
     <string name="listen">监听</string>
     <string name="files">文件</string>
     <string name="browse_files">浏览文件</string>
-    <string name="browse_configuration_providers">浏览配置文件和外部资源</string>
+    <string name="browse_configuration_providers">浏览配置文件和代理集合</string>
     <string name="rename">重命名</string>
     <string name="file_name">文件名</string>
     <string name="format_type_unsaved">%s (未保存)</string>
@@ -176,7 +177,7 @@
     <string name="profile_url">配置 URL</string>
     <string name="should_not_be_blank">不能为空</string>
     <string name="format_fetching_configuration">正在从 %s 下载配置文件</string>
-    <string name="format_fetching_provider">正在下载外部资源 %s</string>
+    <string name="format_fetching_provider">正在下载代理集合 %s</string>
     <string name="initializing">正在初始化</string>
     <string name="verifying">正在校验</string>
     <string name="force_enable">强制启用</string>
