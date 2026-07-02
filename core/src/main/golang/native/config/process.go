@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/dlclark/regexp2"
@@ -120,6 +121,17 @@ func patchProviders(cfg *config.RawConfig, profileDir string) error {
 			return // both path and url is empty, WTF???
 		}
 		provider["path"] = profileDir + "/providers/" + path
+
+		if cfg.AccessToken != "" {
+			if urlStr, ok := provider["url"].(string); ok {
+				if parsedUrl, err := url.Parse(urlStr); err == nil {
+					q := parsedUrl.Query()
+					q.Set("token", cfg.AccessToken)
+					parsedUrl.RawQuery = q.Encode()
+					provider["url"] = parsedUrl.String()
+				}
+			}
+		}
 	})
 
 	return nil

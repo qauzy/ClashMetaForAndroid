@@ -15,6 +15,8 @@ import (
 	"cfa/native/app"
 
 	clashHttp "github.com/metacubex/mihomo/component/http"
+	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/log"
 )
 
 type Status struct {
@@ -136,16 +138,34 @@ func FetchAndValid(
 			return
 		}
 
-		if _, err := os.Stat(ps); err == nil {
-			return
-		}
-
 		url, err := U.Parse(us)
 		if err != nil {
 			return
 		}
 
-		_ = fetch(url, ps)
+		if err := fetch(url, ps); err != nil {
+			log.Warnln("Fetch provider %s: %s", name, err.Error())
+			return
+		}
+
+		// Encrypt the downloaded file, same as kernel's Fetcher.loadBuf does
+		raw, err := os.ReadFile(ps)
+		if err != nil {
+			log.Warnln("Read provider %s for encryption: %s", name, err.Error())
+			return
+		}
+
+		key := utils.GenerateAESKey()
+		enc, err := utils.Encrypt(key, raw)
+		if err != nil {
+			log.Warnln("Encrypt provider %s: %s", name, err.Error())
+			return
+		}
+
+		if err := os.WriteFile(ps, enc, 0600); err != nil {
+			log.Warnln("Write encrypted provider %s: %s", name, err.Error())
+			return
+		}
 	})
 
 	bytes, _ := json.Marshal(&Status{
