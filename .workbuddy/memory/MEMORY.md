@@ -13,7 +13,7 @@
 
 ## 已修复问题
 - proxyProvider与内核处理不一致 → 节点空 (2026-07-02)
-  - 根因：CFA的fetch()和内核HTTPVehicle.Read()下载provider时处理方式不一致
-  - HTTPVehicle.Read()处理X-UUID解密、Cloudflare回退、proxy支持，CFA的fetch()都不做
+  - 根因：服务端返回X-UUID加密数据，CFA的fetch()直接io.Copy写盘(未解密)，内核HTTPVehicle.Read()会先X-UUID解密再处理
+  - 内核Initial()读到未解密的服务端加密数据→AES Decrypt→乱码→parse失败→fallback Update()成功→AES加密写盘→下次Initial()正常
   - 修复方式：fetch.go中用resource.NewHTTPVehicle+vehicle.Read()下载provider(和内核Update()一样)，再AES加密写盘
   - 不修改内核fetcher.go，外壳和内核对provider文件处理方式统一

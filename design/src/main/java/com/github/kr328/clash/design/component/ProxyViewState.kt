@@ -6,6 +6,7 @@ import android.graphics.Path
 import android.graphics.Rect
 import com.github.kr328.clash.core.model.Proxy
 import com.github.kr328.clash.design.model.ProxyState
+import com.github.kr328.clash.design.util.ProxyDelayColor
 import kotlin.math.absoluteValue
 import kotlin.math.max
 
@@ -22,6 +23,8 @@ class ProxyViewState(
     var title: String = ""
     var subtitle: String = ""
     var delayText: String = ""
+    var delayColor: Int = ProxyDelayColor.getDelayTextColor(0)
+    var delayChipBackground: Int = Color.TRANSPARENT
     var background: Int = config.unselectedBackground
     var controls: Int = config.unselectedControl
 
@@ -59,6 +62,8 @@ class ProxyViewState(
         if (delay != proxy.delay) {
             delay = proxy.delay
             delayText = if (proxy.delay in 0..Short.MAX_VALUE) proxy.delay.toString() else ""
+            delayColor = ProxyDelayColor.getDelayTextColor(proxy.delay)
+            delayChipBackground = ProxyDelayColor.getDelayChipBackground(proxy.delay)
         }
 
         if (parentNow !== parent.now) {

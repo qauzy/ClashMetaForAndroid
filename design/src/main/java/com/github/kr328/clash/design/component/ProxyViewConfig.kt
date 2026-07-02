@@ -37,4 +37,8 @@ class ProxyViewConfig(val context: Context, var proxyLine: Int) {
 
     val cardRadius = context.getPixels(R.dimen.proxy_card_radius).toFloat()
     var cardOffset = context.getPixels(R.dimen.proxy_card_offset).toFloat()
+
+    val chipRadius = context.getPixels(R.dimen.proxy_chip_radius).toFloat()
+    val chipPadding = context.getPixels(R.dimen.proxy_chip_padding).toFloat()
+    val chipMargin = context.getPixels(R.dimen.proxy_chip_margin).toFloat()
 }

@@ -131,12 +131,17 @@ class ProxyView(
 
         state.paint.getTextBounds(state.delayText, 0, delayCount, state.rect)
 
-        val delayWidth = state.rect.width()
+        val delayTextWidth = state.rect.width()
+        val delayTextHeight = state.rect.height()
+
+        // chip dimensions
+        val chipH = delayTextHeight + state.config.chipPadding * 2
+        val chipW = delayTextWidth + state.config.chipPadding * 2 + state.config.chipMargin
 
         val mainTextWidth = (width -
                 state.config.layoutPadding * 2 -
                 state.config.contentPadding * 2 -
-                delayWidth -
+                chipW -
                 state.config.textMargin * 2
                 )
             .coerceAtLeast(0f)
@@ -160,21 +165,43 @@ class ProxyView(
         // text draw measure
         val textOffset = (paint.descent() + paint.ascent()) / 2
 
+        // draw delay chip background
         paint.reset()
+        paint.isAntiAlias = true
+        paint.color = state.delayChipBackground
+        paint.style = Paint.Style.FILL
 
+        val chipX = width - state.config.layoutPadding - state.config.contentPadding - chipW + state.config.chipMargin
+        val chipY = height / 2f - chipH / 2f
+
+        canvas.apply {
+            drawRoundRect(
+                chipX, chipY,
+                chipX + chipW, chipY + chipH,
+                state.config.chipRadius, state.config.chipRadius,
+                paint
+            )
+        }
+
+        // draw delay text
+        paint.reset()
         paint.textSize = state.config.textSize
         paint.isAntiAlias = true
-        paint.color = state.controls
+        paint.color = state.delayColor
 
-        // draw delay
         canvas.apply {
-            val x = width - state.config.layoutPadding - state.config.contentPadding - delayWidth
+            val x = chipX + state.config.chipPadding
             val y = height / 2f - textOffset
 
             drawText(state.delayText, 0, delayCount, x, y, paint)
         }
 
         // draw title
+        paint.reset()
+        paint.textSize = state.config.textSize
+        paint.isAntiAlias = true
+        paint.color = state.controls
+
         canvas.apply {
             val x = state.config.layoutPadding + state.config.contentPadding
             val y = state.config.layoutPadding +
