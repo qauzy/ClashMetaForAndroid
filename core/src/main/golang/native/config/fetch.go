@@ -15,6 +15,7 @@ import (
 	"cfa/native/app"
 
 	clashHttp "github.com/metacubex/mihomo/component/http"
+	"github.com/metacubex/mihomo/component/resource"
 	"github.com/metacubex/mihomo/common/utils"
 	"github.com/metacubex/mihomo/log"
 )
@@ -138,30 +139,25 @@ func FetchAndValid(
 			return
 		}
 
-		url, err := U.Parse(us)
+		// Use HTTPVehicle.Read() to download, same as kernel's Fetcher.Update()
+		// This handles X-UUID decryption, Cloudflare bypass, proxy, etc.
+		proxy, _ := provider["proxy"].(string)
+		vehicle := resource.NewHTTPVehicle(us, ps, proxy, nil, 60*time.Second, 0)
+		buf, _, err := vehicle.Read(context.Background(), utils.HashType{})
 		if err != nil {
-			return
-		}
-
-		if err := fetch(url, ps); err != nil {
 			log.Warnln("Fetch provider %s: %s", name, err.Error())
 			return
 		}
 
-		// Encrypt the downloaded file, same as kernel's Fetcher.loadBuf does
-		raw, err := os.ReadFile(ps)
-		if err != nil {
-			log.Warnln("Read provider %s for encryption: %s", name, err.Error())
-			return
-		}
-
+		// Encrypt the downloaded data, same as kernel's Fetcher.loadBuf does
 		key := utils.GenerateAESKey()
-		enc, err := utils.Encrypt(key, raw)
+		enc, err := utils.Encrypt(key, buf)
 		if err != nil {
 			log.Warnln("Encrypt provider %s: %s", name, err.Error())
 			return
 		}
 
+		_ = os.MkdirAll(P.Dir(ps), 0700)
 		if err := os.WriteFile(ps, enc, 0600); err != nil {
 			log.Warnln("Write encrypted provider %s: %s", name, err.Error())
 			return

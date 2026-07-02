@@ -12,6 +12,8 @@
 - **CFA patch**: patchProviders 把 provider path 改为 profileDir/providers/hash (每profile独立)
 
 ## 已修复问题
-- proxyProvider未加密文件与内核Decrypt不一致 → 节点空 (2026-07-02)
-  - 修复方式：fetch.go下载provider后用utils.Encrypt加密保存，与内核loadBuf加密方式一致
-  - 不修改内核fetcher.go，外壳和内核对provider文件处理方式统一即可
+- proxyProvider与内核处理不一致 → 节点空 (2026-07-02)
+  - 根因：CFA的fetch()和内核HTTPVehicle.Read()下载provider时处理方式不一致
+  - HTTPVehicle.Read()处理X-UUID解密、Cloudflare回退、proxy支持，CFA的fetch()都不做
+  - 修复方式：fetch.go中用resource.NewHTTPVehicle+vehicle.Read()下载provider(和内核Update()一样)，再AES加密写盘
+  - 不修改内核fetcher.go，外壳和内核对provider文件处理方式统一
