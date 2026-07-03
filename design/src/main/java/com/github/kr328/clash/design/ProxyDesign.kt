@@ -62,7 +62,9 @@ class ProxyDesign(
         proxies: List<Proxy>,
         selectable: Boolean,
         parent: ProxyState,
-        links: Map<String, ProxyState>
+        links: Map<String, ProxyState>,
+        groupType: Proxy.Type,
+        currentProxyName: String,
     ) {
         val states = withContext(Dispatchers.Default) {
             proxies.map {
@@ -77,6 +79,8 @@ class ProxyDesign(
                 position,
                 ProxyGroupAdapter.ProxyGroupData(
                     name = groupNames[position],
+                    type = groupType,
+                    currentProxyName = currentProxyName,
                     states = states,
                     selectable = selectable,
                 )
@@ -152,6 +156,8 @@ class ProxyDesign(
                 groupNames.map { name ->
                     ProxyGroupAdapter.ProxyGroupData(
                         name = name,
+                        type = Proxy.Type.Selector,
+                        currentProxyName = "",
                         states = emptyList(),
                         selectable = false,
                     )

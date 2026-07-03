@@ -6,6 +6,7 @@ import com.github.kr328.clash.core.model.Proxy
 import com.github.kr328.clash.design.ProxyDesign
 import com.github.kr328.clash.design.model.ProxyState
 import com.github.kr328.clash.util.withClash
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.select
@@ -30,6 +31,13 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
         setContentDesign(design)
 
         design.requests.send(ProxyDesign.Request.ReloadAll)
+
+        launch {
+            while (isActive) {
+                delay(10000)
+                design.requests.send(ProxyDesign.Request.ReloadAll)
+            }
+        }
 
         while (isActive) {
             select<Unit> {
@@ -77,7 +85,9 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
                                     group.proxies,
                                     group.type == Proxy.Type.Selector,
                                     state,
-                                    unorderedStates
+                                    unorderedStates,
+                                    group.type,
+                                    group.now,
                                 )
                             }
                         }

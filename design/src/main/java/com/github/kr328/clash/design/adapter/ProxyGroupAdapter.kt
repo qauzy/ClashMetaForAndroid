@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.github.kr328.clash.core.model.Proxy
 import com.github.kr328.clash.design.R
 import com.github.kr328.clash.design.component.ProxyView
 import com.github.kr328.clash.design.component.ProxyViewConfig
@@ -19,12 +20,15 @@ class ProxyGroupAdapter(
 
     data class ProxyGroupData(
         val name: String,
+        val type: Proxy.Type,
+        val currentProxyName: String,
         val states: List<ProxyViewState>,
         val selectable: Boolean,
     )
 
     class HeaderHolder(view: View) : RecyclerView.ViewHolder(view) {
         val groupName: TextView = view.findViewById(R.id.group_name)
+        val groupType: TextView = view.findViewById(R.id.group_type)
         val expandIcon: ImageView = view.findViewById(R.id.expand_icon)
     }
 
@@ -65,6 +69,8 @@ class ProxyGroupAdapter(
         when (holder) {
             is HeaderHolder -> {
                 holder.groupName.text = group.name
+                holder.groupType.text = group.currentProxyName
+                holder.groupType.visibility = if (group.currentProxyName.isNotEmpty()) View.VISIBLE else View.GONE
                 holder.expandIcon.rotation = if (item.groupIndex in expanded) 180f else 0f
                 holder.itemView.setOnClickListener {
                     headerClicked(item.groupIndex)
