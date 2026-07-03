@@ -32,7 +32,11 @@
         <variable
             name="hasProviders"
             type="boolean" />
+        <variable
+            name="currentMode"
+            type="com.github.kr328.clash.core.model.TunnelState.Mode" />
         <import type="android.view.View" />
+        <import type="com.github.kr328.clash.core.model.TunnelState" />
         <import type="com.github.kr328.clash.design.MainDesign.Request" />
     </data>
 
@@ -94,6 +98,77 @@
                     app:subtext="@{clashRunning ? @string/format_traffic_forwarded(forwarded) : @string/tap_to_start}"
                     app:text="@{clashRunning ? @string/running : @string/stopped}" />
 
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="@dimen/main_card_margin_vertical"
+                    app:cardCornerRadius="@dimen/large_action_card_radius"
+                    app:cardElevation="@dimen/large_action_card_elevation">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/mode_rule"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@{currentMode == TunnelState.Mode.Rule ? colorClashStarted : @android:color/white}"
+                            android:textColor="@{currentMode == TunnelState.Mode.Rule ? @android:color/white : @android:color/black}"
+                            android:foreground="?attr/selectableItemBackground"
+                            android:gravity="center"
+                            android:onClick="@{() -> self.request(Request.SetModeRule)}"
+                            android:padding="16dp"
+                            android:text="@string/rule_mode"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="?android:attr/listDivider" />
+
+                        <TextView
+                            android:id="@+id/mode_global"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@{currentMode == TunnelState.Mode.Global ? colorClashStarted : @android:color/white}"
+                            android:textColor="@{currentMode == TunnelState.Mode.Global ? @android:color/white : @android:color/black}"
+
+                            android:foreground="?attr/selectableItemBackground"
+                            android:gravity="center"
+                            android:onClick="@{() -> self.request(Request.SetModeGlobal)}"
+                            android:padding="16dp"
+                            android:text="@string/global_mode"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                            android:textStyle="bold" />
+
+                        <View
+                            android:layout_width="1dp"
+                            android:layout_height="match_parent"
+                            android:background="?android:attr/listDivider" />
+
+                        <TextView
+                            android:id="@+id/mode_direct"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:background="@{currentMode == TunnelState.Mode.Direct ? colorClashStarted : @android:color/white}"
+                            android:textColor="@{currentMode == TunnelState.Mode.Direct ? @android:color/white : @android:color/black}"
+
+                            android:foreground="?attr/selectableItemBackground"
+                            android:gravity="center"
+                            android:onClick="@{() -> self.request(Request.SetModeDirect)}"
+                            android:padding="16dp"
+                            android:text="@string/direct_mode"
+                            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
                 <com.github.kr328.clash.design.view.LargeActionCard
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -101,7 +176,6 @@
                     android:onClick="@{() -> self.request(Request.OpenProxy)}"
                     android:visibility="@{clashRunning ? View.VISIBLE : View.GONE}"
                     app:icon="@drawable/ic_baseline_apps"
-                    app:subtext="@{mode}"
                     app:text="@string/proxy" />
 
                 <FrameLayout

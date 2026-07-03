@@ -61,7 +61,7 @@
     <dimen name="main_label_margin_vertical">2dp</dimen>
     <dimen name="main_padding_horizontal">30dp</dimen>
     <dimen name="main_logo_size">50dp</dimen>
-    <dimen name="main_top_banner_height">90dp</dimen>
+    <dimen name="main_top_banner_height">56dp</dimen>
 
     <!--  Proxy Design -->
     <dimen name="proxy_layout_padding">3dp</dimen>

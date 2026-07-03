@@ -51,6 +51,11 @@ class UiStore(context: Context) {
         defaultValue = ""
     )
 
+    var proxyModeOverride: String by store.string(
+        key = "proxy_mode_override",
+        defaultValue = "",
+    )
+
     var accessControlSort: AppInfoSort by store.enum(
         key = "access_control_sort",
         defaultValue = AppInfoSort.Label,

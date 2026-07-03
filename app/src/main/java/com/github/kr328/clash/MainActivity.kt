@@ -7,6 +7,8 @@ import android.widget.ImageButton
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.core.content.ContextCompat
+import com.github.kr328.clash.core.Clash
+import com.github.kr328.clash.core.model.TunnelState
 import com.github.kr328.clash.common.util.intent
 import com.github.kr328.clash.common.util.setUUID
 import com.github.kr328.clash.common.util.ticker
@@ -39,7 +41,7 @@ class MainActivity : BaseActivity<MainDesign>() {
     private var updateProvidersButton: ImageButton? = null // Provider 更新按钮引用
 
     override suspend fun main() {
-        val design = MainDesign(this)
+        val design = MainDesign(this, uiStore)
         // 获取按钮引用
         updateButton = design.root.findViewById(R.id.syncButton)                  // Profile 更新按钮
 
@@ -55,9 +57,16 @@ class MainActivity : BaseActivity<MainDesign>() {
             select<Unit> {
                 events.onReceive {
                     when (it) {
-                        Event.ActivityStart,
+                        Event.ActivityStart -> {
+                            design.fetch()
+                            applySavedProxyMode()
+                        }
                         Event.ServiceRecreated,
-                        Event.ClashStop, Event.ClashStart,
+                        Event.ClashStart -> {
+                            design.fetch()
+                            applySavedProxyMode()
+                        }
+                        Event.ClashStop,
                         Event.ProfileLoaded, Event.ProfileChanged -> design.fetch()
                         else -> Unit
                     }
@@ -158,6 +167,54 @@ class MainActivity : BaseActivity<MainDesign>() {
                             startActivity(HelpActivity::class.intent)
                         MainDesign.Request.OpenAbout ->
                             design.showAbout(queryAppVersionName())
+                        MainDesign.Request.SetModeRule -> {
+                            design.saveMode(TunnelState.Mode.Rule)
+                            design.setMode(TunnelState.Mode.Rule)
+                            runCatching { withClash {
+                                val o = queryOverride(Clash.OverrideSlot.Session)
+                                o.mode = TunnelState.Mode.Rule
+                                patchOverride(Clash.OverrideSlot.Session, o)
+                            } }
+                            runCatching { withClash {
+                                var attempts = 0
+                                while (queryTunnelState().mode != TunnelState.Mode.Rule && attempts < 100) {
+                                    delay(10)
+                                    attempts++
+                                }
+                            } }
+                        }
+                        MainDesign.Request.SetModeGlobal -> {
+                            design.saveMode(TunnelState.Mode.Global)
+                            design.setMode(TunnelState.Mode.Global)
+                            runCatching { withClash {
+                                val o = queryOverride(Clash.OverrideSlot.Session)
+                                o.mode = TunnelState.Mode.Global
+                                patchOverride(Clash.OverrideSlot.Session, o)
+                            } }
+                            runCatching { withClash {
+                                var attempts = 0
+                                while (queryTunnelState().mode != TunnelState.Mode.Global && attempts < 100) {
+                                    delay(10)
+                                    attempts++
+                                }
+                            } }
+                        }
+                        MainDesign.Request.SetModeDirect -> {
+                            design.saveMode(TunnelState.Mode.Direct)
+                            design.setMode(TunnelState.Mode.Direct)
+                            runCatching { withClash {
+                                val o = queryOverride(Clash.OverrideSlot.Session)
+                                o.mode = TunnelState.Mode.Direct
+                                patchOverride(Clash.OverrideSlot.Session, o)
+                            } }
+                            runCatching { withClash {
+                                var attempts = 0
+                                while (queryTunnelState().mode != TunnelState.Mode.Direct && attempts < 100) {
+                                    delay(10)
+                                    attempts++
+                                }
+                            } }
+                        }
                     }
                 }
                 if (clashRunning) {
@@ -261,8 +318,27 @@ class MainActivity : BaseActivity<MainDesign>() {
             queryProviders()
         }
 
-        setMode(state.mode)
         setHasProviders(providers.isNotEmpty())
+
+        val savedOverride = uiStore.proxyModeOverride
+        if (savedOverride.isNotEmpty()) {
+            val mode = when (savedOverride) {
+                "rule" -> TunnelState.Mode.Rule
+                "global" -> TunnelState.Mode.Global
+                "direct" -> TunnelState.Mode.Direct
+                else -> null
+            }
+            if (mode != null) {
+                setMode(mode)
+                withClash {
+                    val o = queryOverride(Clash.OverrideSlot.Session)
+                    o.mode = mode
+                    patchOverride(Clash.OverrideSlot.Session, o)
+                }
+            }
+        } else {
+            setMode(state.mode)
+        }
 
         withProfile {
             val activeProfile = queryActive()
@@ -315,6 +391,22 @@ class MainActivity : BaseActivity<MainDesign>() {
         } catch (e: Exception) {
             design?.showToast(R.string.unable_to_start_vpn, ToastDuration.Long)
         }
+    }
+
+    private suspend fun applySavedProxyMode() {
+        val saved = uiStore.proxyModeOverride
+        if (saved.isEmpty()) return
+        val mode = when (saved) {
+            "rule" -> TunnelState.Mode.Rule
+            "global" -> TunnelState.Mode.Global
+            "direct" -> TunnelState.Mode.Direct
+            else -> return
+        }
+        runCatching { withClash {
+            val o = queryOverride(Clash.OverrideSlot.Session)
+            o.mode = mode
+            patchOverride(Clash.OverrideSlot.Session, o)
+        } }
     }
 
     private suspend fun queryAppVersionName(): String {

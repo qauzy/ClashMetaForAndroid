@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 class ProxyDesign(
     context: Context,
     overrideMode: TunnelState.Mode?,
-    private val groupNames: List<String>,
+    private var groupNames: List<String>,
     uiStore: UiStore,
 ) : Design<ProxyDesign.Request>(context) {
     sealed class Request {
@@ -89,6 +89,34 @@ class ProxyDesign(
             urlTestingGroups.remove(position)
 
             updateUrlTestButtonStatus()
+        }
+    }
+
+    fun resetGroups(newOverrideMode: TunnelState.Mode?, newGroupNames: List<String>) {
+        groupNames = newGroupNames
+
+        if (newGroupNames.isEmpty()) {
+            binding.emptyView.visibility = View.VISIBLE
+            binding.urlTestView.visibility = View.GONE
+            binding.proxyList.visibility = View.GONE
+            binding.urlTestFloatView.visibility = View.GONE
+        } else {
+            binding.emptyView.visibility = View.GONE
+            binding.urlTestView.visibility = View.VISIBLE
+            binding.proxyList.visibility = View.VISIBLE
+            binding.urlTestFloatView.visibility = View.VISIBLE
+
+            groupAdapter.setGroups(
+                newGroupNames.map { name ->
+                    ProxyGroupAdapter.ProxyGroupData(
+                        name = name,
+                        type = Proxy.Type.Selector,
+                        currentProxyName = "",
+                        states = emptyList(),
+                        selectable = false,
+                    )
+                }
+            )
         }
     }
 

@@ -9,6 +9,7 @@ import com.github.kr328.clash.core.model.TunnelState
 import com.github.kr328.clash.core.util.trafficTotal
 import com.github.kr328.clash.design.databinding.DesignAboutBinding
 import com.github.kr328.clash.design.databinding.DesignMainBinding
+import com.github.kr328.clash.design.store.UiStore
 import com.github.kr328.clash.design.util.layoutInflater
 import com.github.kr328.clash.design.util.resolveThemedColor
 import com.github.kr328.clash.design.util.root
@@ -16,7 +17,7 @@ import com.github.kr328.clash.service.model.Profile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
+class MainDesign(context: Context, val uiStore: UiStore) : Design<MainDesign.Request>(context) {
     enum class Request {
         ToggleStatus,
         OpenProxy,
@@ -29,6 +30,9 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
         UpdateActive,
         UpdateProvider,
         BuyProfile,
+        SetModeRule,
+        SetModeGlobal,
+        SetModeDirect,
     }
     val profileExpiry = ObservableField<String>("") // 初始化为空字符串，避免 null
     var showBuyButton = ObservableBoolean(true)
@@ -77,6 +81,18 @@ class MainDesign(context: Context) : Design<MainDesign.Request>(context) {
                 TunnelState.Mode.Global -> context.getString(R.string.global_mode)
                 TunnelState.Mode.Rule -> context.getString(R.string.rule_mode)
                 else -> context.getString(R.string.rule_mode)
+            }
+            binding.currentMode = mode
+        }
+    }
+
+    suspend fun saveMode(mode: TunnelState.Mode) {
+        withContext(Dispatchers.Main) {
+            uiStore.proxyModeOverride = when (mode) {
+                TunnelState.Mode.Rule -> "rule"
+                TunnelState.Mode.Global -> "global"
+                TunnelState.Mode.Direct -> "direct"
+                else -> ""
             }
         }
     }

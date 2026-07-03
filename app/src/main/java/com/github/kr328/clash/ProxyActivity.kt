@@ -15,10 +15,10 @@ import kotlinx.coroutines.sync.withPermit
 
 class ProxyActivity : BaseActivity<ProxyDesign>() {
     override suspend fun main() {
-        val mode = withClash { queryOverride(Clash.OverrideSlot.Session).mode }
-        val names = withClash { queryProxyGroupNames(uiStore.proxyExcludeNotSelectable) }
-        val states = List(names.size) { ProxyState("?") }
-        val unorderedStates = names.indices.map { names[it] to states[it] }.toMap()
+        var mode = withClash { queryOverride(Clash.OverrideSlot.Session).mode }
+        var names = withClash { queryProxyGroupNames(uiStore.proxyExcludeNotSelectable) }
+        var states = List(names.size) { ProxyState("?") }
+        var unorderedStates = names.indices.map { names[it] to states[it] }.toMap()
         val reloadLock = Semaphore(10)
 
         val design = ProxyDesign(
@@ -44,14 +44,18 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
                 events.onReceive {
                     when (it) {
                         Event.ProfileLoaded -> {
+                            val newMode = withClash { queryOverride(Clash.OverrideSlot.Session).mode }
                             val newNames = withClash {
                                 queryProxyGroupNames(uiStore.proxyExcludeNotSelectable)
                             }
 
-                            if (newNames != names) {
-                                startActivity(ProxyActivity::class.intent)
-
-                                finish()
+                            if (newNames != names || newMode != mode) {
+                                mode = newMode
+                                names = newNames
+                                states = List(names.size) { ProxyState("?") }
+                                unorderedStates = names.indices.map { names[it] to states[it] }.toMap()
+                                design.resetGroups(newMode, newNames)
+                                design.requests.send(ProxyDesign.Request.ReloadAll)
                             }
                         }
                         else -> Unit
@@ -71,6 +75,7 @@ class ProxyActivity : BaseActivity<ProxyDesign>() {
                         }
                         is ProxyDesign.Request.Reload -> {
                             launch {
+                                if (it.index >= names.size || it.index >= states.size) return@launch
                                 val group = reloadLock.withPermit {
                                     withClash {
                                         queryProxyGroup(names[it.index], uiStore.proxySort)
